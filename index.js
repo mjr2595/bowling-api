@@ -9,6 +9,7 @@ var config = require('./config/config');
 
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json());
+
 app.post('/addUser',userController.addUser);
 app.delete('/deleteUser',userController.deleteUser);
 app.post('/play',gameController.play);
