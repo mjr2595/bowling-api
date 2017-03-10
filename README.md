@@ -29,7 +29,7 @@ REST API to power a bowling alley's display.
 #### UPDATE
  * Route       | /play
  * Method      | POST 
- * Body        | `{ id: 1, score: '56x8/'}`
+ * Body        | `{ id: 1, score: '53x8/'}`
  * Description | Updates the given user's current score
  
 #### REMOVE
