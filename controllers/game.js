@@ -1,6 +1,12 @@
 // dependencies
 var usersModel = require('../models/users');
 
+/*
+simulates a roll or throw
+request is given id, name, and score (throws so far) as string
+updates score
+response returns either 200 (OK) or error
+*/
 exports.play = function(req, res, next){
   var user_id = req.body.id;
   var curr_score = req.body.score;
@@ -41,6 +47,11 @@ exports.play = function(req, res, next){
   });
 }
 
+/*
+gets user's current score
+request is given id
+response returns current score and either 200 (OK) or error
+*/
 exports.score = function(req, res, next){
   var user_id = req.params.userId;
   usersModel.findOne({_id:user_id}, function(err, user){
@@ -58,6 +69,10 @@ exports.score = function(req, res, next){
 
 // Helper functions
 
+/*
+Main helper function
+given string of throws, returns the running score
+*/
 function getRunningScore(throws_string) {
   // easier to work with as an array
   var throws_arr = throws_string.split('');
@@ -97,6 +112,8 @@ function getRunningScore(throws_string) {
   }
   return running_score;
 }
+
+// helper functions for calulating scores for either strike or spare
 
 function getNextThrow(throws_arr, i, throw_count) {
   if (!throws_arr[i+1]) {

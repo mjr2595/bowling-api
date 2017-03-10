@@ -10,4 +10,6 @@
 
 ## Running
 1. run `npm start` to begin
-2. run `npm test` to run tests using mocha
+
+## TODO
+1. fix testing framework

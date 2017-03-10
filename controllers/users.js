@@ -1,6 +1,12 @@
 // dependencies
 var usersModel = require('../models/users');
 
+/*
+adds a new user
+request is given id and name
+sets score to 0
+response returns either 200 (OK) or error
+*/
 exports.addUser = function(req, res, next){
   var user = {}
   user._id = req.body.id;
@@ -16,6 +22,12 @@ exports.addUser = function(req, res, next){
   });
 }
 
+/*
+deletes a user
+request is given id
+removes user if found
+response returns either 200 (OK) or error
+*/
 exports.deleteUser = function(req, res, next){
   var id = req.body.id;
   usersModel.find({_id: id}).remove(function(err, data){

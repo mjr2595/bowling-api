@@ -155,7 +155,7 @@ describe('Test Suite for Bowling API', function() {
         if (err) {
           throw err;
         }
-        res.status.should.equal(400);
+        res.status.should.equal(200);
         done();
       });
     });

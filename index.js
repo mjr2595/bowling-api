@@ -7,9 +7,11 @@ var userController = require('./controllers/users');
 var gameController = require('./controllers/game');
 var config = require('./config/config');
 
+// Body parser middleware
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json());
 
+// Routes
 app.post('/addUser', userController.addUser);
 app.delete('/deleteUser', userController.deleteUser);
 app.post('/play', gameController.play);
