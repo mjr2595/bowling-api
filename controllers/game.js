@@ -19,13 +19,14 @@ exports.play = function(req, res, next){
       res.status(400).json({status: '!! User NOT found !!'});
       return;
     }
-    // not first frame, so add to current score
+    //not first frame, so add to current score
     if (user.frames) {
       user.frames += curr_score;
     } else {
       // is first frame
       user.frames = curr_score;
     }
+    user.frames = curr_score;
     // calculate running score
     user.score = getRunningScore(user.frames);
 
@@ -68,17 +69,17 @@ function getRunningScore(throws_string) {
     throw_count++;
     // check for strike
     if (throws_arr[i] == 'x' && throw_count == 1) {
-      frame[frame_count] = 10 + getNextTwoThrows(throws_arr, i, throw_count);
+      frame[frame_count] = getNextTwoThrows(throws_arr, i, throw_count);
       throw_count = 0;
       i++;
     // check for spare
     } else if (throws_arr[i] == '/' && throw_count == 2) {
-      frame[frame_count] = 10 + getNextThrow(throws_arr, i, throw_count);
+      frame[frame_count] = getNextThrow(throws_arr, i, throw_count);
       throw_count = 0;
       i++;
     } else {
       if (throw_count == 1 && throws_arr[i+1] && throws_arr[i+1] == '/') {
-        frame[frame_count] = 10 + getNextThrow(throws_arr, i+1, throw_count);
+        frame[frame_count] = getNextThrow(throws_arr, i+1, throw_count);
         throw_count = 0;
         i += 2;
       } else if (throw_count == 1 && throws_arr[i+1] && throws_arr[i+1] != '/') {
