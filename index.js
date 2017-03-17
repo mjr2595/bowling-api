@@ -8,14 +8,14 @@ var gameController = require('./controllers/game');
 var config = require('./config/config');
 
 // Body parser middleware
-app.use(bodyParser.urlencoded({ extended: false }))
+app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json());
 
 // Routes
 app.post('/addUser', userController.addUser);
-app.delete('/deleteUser', userController.deleteUser);
-app.post('/play', gameController.play);
-app.get('/score/:userId', gameController.score);
+app.delete('/deleteUser/:name', userController.deleteUser);
+app.post('/play/:name', gameController.play);
+app.get('/score/:name', gameController.score);
 app.listen(config.port||3000);
 
 console.log('listening on port 3000...');

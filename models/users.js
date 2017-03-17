@@ -2,10 +2,11 @@ var mongoose = require('../database/database.js');
 var Schema = mongoose.Schema;
 
 var userSchema = new Schema({
-  _id: Number,
   name: String,
   score: Number,
-  frames: String
+  rolls: [Number],
+  currentRoll: Number,
+  currentFrameNum: Number
 });
 
 var User = mongoose.model('User', userSchema);

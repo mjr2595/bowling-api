@@ -1,60 +1,113 @@
 // dependencies
 var usersModel = require('../models/users');
 
+
 /*
 simulates a roll or throw
-request is given id, name, and score (throws so far) as string
+request param is user's name, request body is current roll (as number val)
 updates score
 response returns either 200 (OK) or error
 */
-exports.play = function(req, res, next){
-  var user_id = req.body.id;
-  var curr_score = req.body.score;
-  var pattern = /^(x|\/|[0-9])*$/
 
-  if (!pattern.test(curr_score)) {
-    res.status(400).json({status: '!! Invalid Score !!'});
-    return;
-  }
-  usersModel.findOne({_id:user_id}, function(err, user){
+exports.play = function(req, res, next){
+  var userName = req.params.name;
+  var currRoll = req.body.currentRoll;
+
+  usersModel.findOne({name: userName}, function(err, user){
     if (err) {
       res.status(400).json({status: err});
       return;
     }
     if (!user) {
-      res.status(400).json({status: '!! User NOT found !!'});
+      res.status(400).json({status: '!! User NOT found !! -- Please create new user'});
       return;
     }
-    //not first frame, so add to current score
-    if (user.frames) {
-      user.frames += curr_score;
-    } else {
-      // is first frame
-      user.frames = curr_score;
-    }
-    user.frames = curr_score;
-    // calculate running score
-    user.score = getRunningScore(user.frames);
+
+    // update current roll, roll array, and score
+    user.currentRoll = currRoll;
+    user.rolls.push(currRoll);
+    user.score = updateScore();
+
+    // print data to console
+    console.log("Name: " + userName);
+    console.log("Rolls: " + user.rolls);
+    console.log("Current Score: " + user.score);
 
     user.save(function(err, data){
       if (err) {
-        res.status(400).json({status: '!! User NOT saved !!'});
+        res.status(400).json({status: '!! Roll NOT saved !!'});
         return;
       }
-      res.status(200).json({status: 'User saved', score: user.score});
+      res.status(200).json({status: 'Roll saved', rolls: user.rolls});
     });
 
+    // helper functions for calulating current score
+    function updateScore() {
+      var score = 0;
+      var frameIndex = 0;
+
+      function frameSum() {
+        var ret = 0;
+        if (user.rolls[frameIndex] !== undefined && user.rolls[frameIndex + 1] !== undefined) {
+          ret = user.rolls[frameIndex] + user.rolls[frameIndex + 1];
+        }
+        return ret;
+      }
+      function sparePoints() {
+        var ret = 0;
+        if (user.rolls[frameIndex + 2] !== undefined) {
+          ret = user.rolls[frameIndex + 2]
+        }
+        return ret;
+      }
+      function strikePoints() {
+        var ret = 0;
+        if (user.rolls[frameIndex + 1] !== undefined && user.rolls[frameIndex + 2] !== undefined) {
+          ret = user.rolls[frameIndex + 1] + user.rolls[frameIndex + 2];
+        }
+        return ret;
+      }
+      function isStrike() {
+        if (user.rolls[frameIndex] === undefined) {
+          return false;
+        } else {
+          return user.rolls[frameIndex] === 10;
+        }
+      }
+      function isSpare() {
+        if (user.rolls[frameIndex] === undefined || user.rolls[frameIndex + 1] === undefined) {
+          return false;
+        } else {
+          return user.rolls[frameIndex] + user.rolls[frameIndex + 1] === 10;
+        }
+      }
+      for (var frame = 0; frame < 10; frame++) {
+        if (isStrike()) {
+          score += 10 + strikePoints();
+          frameIndex++;
+        } else if (isSpare()) {
+          score += 10 + sparePoints();
+          frameIndex += 2;
+        } else {
+          score += frameSum();
+          frameIndex += 2;
+        }
+      }
+      return score;
+    }
   });
 }
 
+
 /*
 gets user's current score
-request is given id
+request param is user's name
 response returns current score and either 200 (OK) or error
 */
+
 exports.score = function(req, res, next){
-  var user_id = req.params.userId;
-  usersModel.findOne({_id:user_id}, function(err, user){
+  var userName = req.params.name;
+  usersModel.findOne({name: userName}, function(err, user){
     if (err) {
       res.status(400).json({status: err});
       return;
@@ -63,87 +116,6 @@ exports.score = function(req, res, next){
       res.status(400).json({status: 'User NOT found'});
       return;
     }
-    res.status(200).json({score: user.score, user_name: user.name});
+    res.status(200).json({score: user.score, name: user.name});
   });
-}
-
-// Helper functions
-
-/*
-Main helper function
-given string of throws, returns the running score
-*/
-function getRunningScore(throws_string) {
-  // easier to work with as an array
-  var throws_arr = throws_string.split('');
-  var frame = [];
-  var running_score = 0;
-  var throw_count = 0;
-  var i = 0;
-  for (var frame_count = 0; frame_count < 10; frame_count++) {
-    throw_count++;
-    // check for strike
-    if (throws_arr[i] == 'x' && throw_count == 1) {
-      frame[frame_count] = getNextTwoThrows(throws_arr, i, throw_count);
-      throw_count = 0;
-      i++;
-    // check for spare
-    } else if (throws_arr[i] == '/' && throw_count == 2) {
-      frame[frame_count] = getNextThrow(throws_arr, i, throw_count);
-      throw_count = 0;
-      i++;
-    } else {
-      if (throw_count == 1 && throws_arr[i+1] && throws_arr[i+1] == '/') {
-        frame[frame_count] = getNextThrow(throws_arr, i+1, throw_count);
-        throw_count = 0;
-        i += 2;
-      } else if (throw_count == 1 && throws_arr[i+1] && throws_arr[i+1] != '/') {
-        frame[frame_count] = parseInt(throws_arr[i]) + parseInt(throws_arr[i+1]);
-        throw_count = 0;
-        i += 2;
-      } else if (!throws_arr[i+1]) {
-        frame[frame_count] = parseInt(throws_arr[i]);
-        i++;
-      }
-    }
-    if (!isNaN(frame[frame_count])) {
-      running_score += frame[frame_count];
-    }
-  }
-  return running_score;
-}
-
-// helper functions for calulating scores for either strike or spare
-
-function getNextThrow(throws_arr, i, throw_count) {
-  if (!throws_arr[i+1]) {
-    // no more throws
-    return 0;
-  } else if (throws_arr[i+1] == 'x') {
-    // next is strike, so return 10
-    return 10;
-  } else {
-    // default case
-    return parseInt(throws_arr[i+1]);
-  }
-}
-
-function getNextTwoThrows(throws_arr, i, throw_count) {
-  if (!throws_arr[i+1]) {
-    return 0;
-  } else if (!throws_arr[i+2]) {
-    if (throws_arr[i+1] == 'x') {
-      return 10;
-    } else {
-      return parseInt(throws_arr[i+1]);
-    }
-  } else if (throws_arr[i+1] == 'x' && throws_arr[i+2] == 'x') {
-    return 20;
-  } else if (throws_arr[i+1] == 'x' && throws_arr[i+2] != 'x') {
-    return 10 + parseInt(throws_arr[i+2]);
-  } else if (throws_arr[i+2] == '/') {
-    return 10;
-  } else {
-    return parseInt(throws_arr[i+1]) + parseInt(throws_arr[i+2]);
-  }
 }

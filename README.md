@@ -2,8 +2,8 @@
 REST API to power a bowling alley's display.
 
 ## Dependencies
-1. Node (latest)
-2. MongoDB (latest)
+* Node (latest)
+* MongoDB (latest)
 
 ## Setup
 1. Download or fork
@@ -11,33 +11,41 @@ REST API to power a bowling alley's display.
 
 ## Running
 1. run `npm start` to begin
+2. use a REST client for messages; I used both Postman and RestEasy
+
+### Notes about game play:
+* user's name must me unique
+* current roll must be a numerical value 0 - 10, "X" or "/" are not valid
+* player can roll past the tenth frames, but only ten frames are counted in the score
 
 ### Endpoints
 
-#### CREATE 
+#### CREATE
  * Route       |  /addUser
  * Method      |  POST
- * Body        |  `{ id: 1, name: foo }`
- * Description | Creates a new user with score of zero 
+ * Body        |  `{ name: foo }`
+ * Description | Creates a new user with score of zero
 
 #### READ
- * Route       | /score/:userId
+ * Route       | /score/:name
  * Method      | GET
- * Parameter   | userId 
+ * Parameter   | name
  * Description | Gets the given user's current score
+ * Returns     | User's current score
 
 #### UPDATE
- * Route       | /play
- * Method      | POST 
- * Body        | `{ id: 1, score: '53x8/'}`
- * Description | Updates the given user's current score
- 
+ * Route       | /play/:name
+ * Method      | POST
+ * Parameter   | name
+ * Body        | `{ currentRoll: 10}`
+ * Description | Simulates a user's roll
+
 #### REMOVE
- * Route       | /deleteUser
+ * Route       | /deleteUser/:name
  * Method      | DELETE
- * Parameter   | userId 
- * Body        | `{ id: 1}`
+ * Parameter   | name
  * Description | Removes user from list of users
 
-## TODO
-1. fix testing framework
+## Potential Future Development
+* create automated testing framework
+* create front-end for game play (possibly Angular)
