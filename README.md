@@ -1,5 +1,5 @@
 # Bowling API
-REST API to power a bowling alley's display.
+REST API to power a bowling alley's display
 
 ## Dependencies
 * Node (latest)
